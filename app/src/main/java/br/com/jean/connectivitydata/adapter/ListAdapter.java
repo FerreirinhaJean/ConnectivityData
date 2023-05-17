@@ -129,15 +129,15 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
     private String convertLevel(int level) {
         if (level == CellSignalStrength.SIGNAL_STRENGTH_GOOD)
-            return "Qualidade sinal: Bom";
+            return "Qualidade sinal: Bom (3)";
         if (level == CellSignalStrength.SIGNAL_STRENGTH_GREAT)
-            return "Qualidade sinal: Ótimo";
+            return "Qualidade sinal: Ótimo (4)";
         if (level == CellSignalStrength.SIGNAL_STRENGTH_MODERATE)
-            return "Qualidade sinal: Moderado";
+            return "Qualidade sinal: Moderado (2)";
         if (level == CellSignalStrength.SIGNAL_STRENGTH_POOR)
-            return "Qualidade sinal: Ruim";
+            return "Qualidade sinal: Ruim (1)";
 
-        return "Qualidade sinal: Desconhecido/Nenhum";
+        return "Qualidade sinal: Desconhecido/Nenhum (0)";
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
