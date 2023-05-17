@@ -65,66 +65,28 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     private String convertNetworkType(int type) {
         String r = "Tipo de conexão móvel: ";
 
-        if (type == TelephonyManager.NETWORK_TYPE_LTE) {
-            return r + "4G";
+        switch (type) {
+            case TelephonyManager.NETWORK_TYPE_EDGE:
+            case TelephonyManager.NETWORK_TYPE_GPRS:
+            case TelephonyManager.NETWORK_TYPE_CDMA:
+            case TelephonyManager.NETWORK_TYPE_IDEN:
+            case TelephonyManager.NETWORK_TYPE_1xRTT:
+                return r + "2G";
+            case TelephonyManager.NETWORK_TYPE_UMTS:
+            case TelephonyManager.NETWORK_TYPE_HSDPA:
+            case TelephonyManager.NETWORK_TYPE_HSPA:
+            case TelephonyManager.NETWORK_TYPE_HSPAP:
+            case TelephonyManager.NETWORK_TYPE_EVDO_0:
+            case TelephonyManager.NETWORK_TYPE_EVDO_A:
+            case TelephonyManager.NETWORK_TYPE_EVDO_B:
+                return r + "3G";
+            case TelephonyManager.NETWORK_TYPE_LTE:
+                return r + "4G";
+            case TelephonyManager.NETWORK_TYPE_NR:
+                return r + "5G";
+            default:
+                return r + "Desconhecido";
         }
-        if (type == TelephonyManager.NETWORK_TYPE_GSM) {
-            return r + "2G";
-        }
-        if (type == TelephonyManager.NETWORK_TYPE_CDMA) {
-            return r + "3G";
-        }
-        if (type == TelephonyManager.NETWORK_TYPE_GPRS) {
-            return r + "GPRS";
-        }
-        if (type == TelephonyManager.NETWORK_TYPE_EDGE) {
-            return r + "EDGE";
-        }
-        if (type == TelephonyManager.NETWORK_TYPE_UMTS) {
-            return r + "UMTS";
-        }
-        if (type == TelephonyManager.NETWORK_TYPE_EVDO_0) {
-            return r + "EVDO_0";
-        }
-        if (type == TelephonyManager.NETWORK_TYPE_EVDO_A) {
-            return r + "EVDO_A";
-        }
-        if (type == TelephonyManager.NETWORK_TYPE_1xRTT) {
-            return r + "1xRTT";
-        }
-        if (type == TelephonyManager.NETWORK_TYPE_HSDPA) {
-            return r + "HSDPA";
-        }
-        if (type == TelephonyManager.NETWORK_TYPE_HSUPA) {
-            return r + "HSUPA";
-        }
-        if (type == TelephonyManager.NETWORK_TYPE_HSPA) {
-            return r + "HSPA";
-        }
-        if (type == TelephonyManager.NETWORK_TYPE_IDEN) {
-            return r + "IDEN";
-        }
-        if (type == TelephonyManager.NETWORK_TYPE_EVDO_B) {
-            return r + "EVDO_B";
-        }
-        if (type == TelephonyManager.NETWORK_TYPE_EHRPD) {
-            return r + "EHRPD";
-        }
-        if (type == TelephonyManager.NETWORK_TYPE_HSPAP) {
-            return r + "HSPAP";
-        }
-        if (type == TelephonyManager.NETWORK_TYPE_TD_SCDMA) {
-            return r + "SCDMA";
-        }
-        if (type == TelephonyManager.NETWORK_TYPE_IWLAN) {
-            return r + "IWLAN";
-        }
-        if (type == TelephonyManager.NETWORK_TYPE_NR) {
-            return r + "NR";
-        }
-
-
-        return r + "Desconhecido";
     }
 
     private String convertLevel(int level) {

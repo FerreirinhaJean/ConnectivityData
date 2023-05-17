@@ -144,30 +144,12 @@ public class GetConnectivityDataActivity extends AppCompatActivity {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 SignalStrength signalStrength = telephonyManager.getSignalStrength();
                 conn.setLevel(signalStrength.getLevel());
-                int networkType = conn.getNetworkType();
 
-                Log.d("SINAL", "networkType: " + networkType);
-                Log.d("SINAL", "level: " + conn.getLevel());
-                Log.d("SINAL", "net: " + telephonyManager.getNetworkSpecifier());
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+                    signalStrengthValue = telephonyManager.getAllCellInfo().get(0).getCellSignalStrength().getDbm();
 
-                if (networkType == TelephonyManager.NETWORK_TYPE_CDMA) {//3G
-                    signalStrengthValue = signalStrength.getCdmaDbm();
-                } else if (networkType == TelephonyManager.NETWORK_TYPE_GSM) {//2G
-                    signalStrengthValue = signalStrength.getGsmSignalStrength();
-                }
-//                else if (networkType == TelephonyManager.NETWORK_TYPE_LTE) {//4G
-                else {//4G
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        signalStrengthValue = telephonyManager.getAllCellInfo().get(0).getCellSignalStrength().getDbm();
-                    }
-                }
 
                 return signalStrengthValue;
-//                if (signalStrengthValue <= -113 || signalStrengthValue == 0) return 0;
-//                if (signalStrengthValue >= -51) return 100;
-//
-//                return (signalStrengthValue + 113) * (100 / 62);
-
             }
         }
         return signalStrengthValue;
