@@ -6,13 +6,10 @@ public class ConnectivityStattement {
     private Double movel;
     private Double latitude;
     private Double longitude;
+    private int networkType;
+    private int level;
 
-
-    public ConnectivityStattement(Double wifi, Double movel, Double latitude, Double longitude) {
-        this.wifi = wifi;
-        this.movel = movel;
-        this.latitude = latitude;
-        this.longitude = longitude;
+    public ConnectivityStattement() {
     }
 
     public Long getId() {
@@ -53,5 +50,21 @@ public class ConnectivityStattement {
 
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
+    }
+
+    public int getNetworkType() {
+        return networkType;
+    }
+
+    public void setNetworkType(int networkType) {
+        this.networkType = networkType;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
     }
 }

@@ -3,19 +3,13 @@ package br.com.jean.connectivitydata;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
-import android.telephony.CellInfo;
-import android.telephony.CellInfoCdma;
-import android.telephony.CellInfoGsm;
-import android.telephony.CellInfoLte;
-import android.telephony.CellSignalStrengthCdma;
-import android.telephony.CellSignalStrengthGsm;
-import android.telephony.CellSignalStrengthLte;
+import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Button;
@@ -27,9 +21,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import br.com.jean.connectivitydata.adapter.ListAdapter;
 import br.com.jean.connectivitydata.models.ConnectivityStattement;
@@ -64,6 +55,13 @@ public class GetConnectivityDataActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(listAdapter);
 
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_PHONE_STATE},
+                    PERMISSION_REQUEST_CODE);
+        }
+
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
@@ -88,7 +86,7 @@ public class GetConnectivityDataActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        listAdapter.atualizar();
+        listAdapter.update();
     }
 
     private void startLocationUpdates() {
@@ -105,13 +103,19 @@ public class GetConnectivityDataActivity extends AppCompatActivity {
                         double latitude = location.getLatitude();
                         double longitude = location.getLongitude();
                         double movel = 0.0;
+                        int networkType = getNetworkType();
+
+                        ConnectivityStattement connectivityStattement = new ConnectivityStattement();
+                        connectivityStattement.setWifi(wifi);
+                        connectivityStattement.setLatitude(latitude);
+                        connectivityStattement.setLongitude(longitude);
+                        connectivityStattement.setNetworkType(networkType);
 
                         if (telephonyManager != null)
-                            movel = getInfoTelephony();
+                          connectivityStattement.setMovel(getInfoTelephony(connectivityStattement));
 
-
-                        connectivityStattementsDao.addRegister(new ConnectivityStattement(wifi, movel, latitude, longitude));
-                        listAdapter.atualizar();
+                        connectivityStattementsDao.addRegister(connectivityStattement);
+                        listAdapter.update();
                     }
                 }
             };
@@ -123,40 +127,46 @@ public class GetConnectivityDataActivity extends AppCompatActivity {
         }
     }
 
-
-    private int getInfoTelephony() {
-        int mobileSignalStrength = 0;
-        int mobileSignalLevel = 0;
-        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+    private int getNetworkType() {
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE)
                 == PackageManager.PERMISSION_GRANTED) {
-            List<CellInfo> cellInfoList = telephonyManager.getAllCellInfo();
-            if (cellInfoList != null) {
-                for (CellInfo cellInfo : cellInfoList) {
-                    if (cellInfo instanceof CellInfoGsm) {//sinal é GSM (3G)
-                        CellSignalStrengthGsm gsmSignalStrength = ((CellInfoGsm) cellInfo).getCellSignalStrength();
-                        mobileSignalStrength = gsmSignalStrength.getDbm();
-                        break;
-                    } else if (cellInfo instanceof CellInfoCdma) {//sinal é CDMA (2G)
-                        CellSignalStrengthCdma cdmaSignalStrength = ((CellInfoCdma) cellInfo).getCellSignalStrength();
-                        mobileSignalStrength = cdmaSignalStrength.getDbm();
-                        break;
-                    } else if (cellInfo instanceof CellInfoLte) {//sinal é LTE (4G)
-                        CellSignalStrengthLte lteSignalStrength = ((CellInfoLte) cellInfo).getCellSignalStrength();
-                        mobileSignalStrength = lteSignalStrength.getDbm();
-                        break;
+            return telephonyManager.getNetworkType();
+        }
+        return TelephonyManager.NETWORK_TYPE_UNKNOWN;
+    }
+
+    private double getInfoTelephony(ConnectivityStattement conn) {
+        int signalStrengthValue = 0;
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE)
+                == PackageManager.PERMISSION_GRANTED) {
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                SignalStrength signalStrength = telephonyManager.getSignalStrength();
+                signalStrength.getLevel();
+                int networkType = conn.getNetworkType();
+                Log.d("SINAL", "networkType: " + networkType);
+
+                if (networkType == TelephonyManager.NETWORK_TYPE_CDMA) {//3G
+                    signalStrengthValue = signalStrength.getCdmaDbm();
+                }
+                if (networkType == TelephonyManager.NETWORK_TYPE_GSM) {//2G
+                    signalStrengthValue = signalStrength.getGsmSignalStrength();
+                }
+                if (networkType == TelephonyManager.NETWORK_TYPE_LTE) {//4G
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        signalStrengthValue = telephonyManager.getAllCellInfo().get(0).getCellSignalStrength().getDbm();
+                        Log.d("SINAL", "signalStrengthValue: " + signalStrengthValue);
                     }
                 }
-            }
-            if (mobileSignalStrength <= -140) {
-                mobileSignalLevel = 0;
-            } else if (mobileSignalStrength >= -50) {
-                mobileSignalLevel = 100;
-            } else {
-                mobileSignalLevel = (2 * (mobileSignalStrength + 140));
+
+                if (signalStrengthValue <= -113 || signalStrengthValue == 0) return 0;
+                if (signalStrengthValue >= -51) return 100;
+
+                return (signalStrengthValue + 113) * (100 / 62);
+
             }
         }
-
-        return mobileSignalLevel;
+        return signalStrengthValue;
     }
 
     private void stopLocationUpdates() {
@@ -172,7 +182,8 @@ public class GetConnectivityDataActivity extends AppCompatActivity {
 
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {

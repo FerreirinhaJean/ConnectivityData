@@ -1,6 +1,7 @@
 package br.com.jean.connectivitydata.adapter;
 
 import android.content.Context;
+import android.telephony.TelephonyManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,11 +41,14 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         String sinalMovel = "Intensidade do sinal móvel: " + connectivityStattement.getMovel() + "%";
         String latitude = "Latitude: " + connectivityStattement.getLatitude();
         String longitude = "Longitude: " + connectivityStattement.getLongitude();
+        String level = "Level: " + connectivityStattement.getLevel();
 
         holder.tvSinalWifi.setText(sinalWifi);
         holder.tvSinalMovel.setText(sinalMovel);
         holder.tvLatitude.setText(latitude);
         holder.tvLongitude.setText(longitude);
+        holder.tvTipoRede.setText(convertNetworkType(connectivityStattement.getNetworkType()));
+        holder.tvLevel.setText(level);
     }
 
     @Override
@@ -52,15 +56,29 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         return connectivityStattements.size();
     }
 
-    public void atualizar() {
+    public void update() {
         connectivityStattements.clear();
         connectivityStattements.addAll(connectivityStattementsDao.getAll());
         notifyDataSetChanged();
     }
 
+    private String convertNetworkType(int type) {
+        if (type == TelephonyManager.NETWORK_TYPE_LTE) {
+            return "Tipo de conexão móvel: 4G";
+        }
+        if (type == TelephonyManager.NETWORK_TYPE_GSM) {
+            return "Tipo de conexão móvel: 2G";
+        }
+        if (type == TelephonyManager.NETWORK_TYPE_CDMA) {
+            return "Tipo de conexão móvel: 3G";
+        }
+
+        return "Tipo de conexão móvel: Indisponível";
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView tvSinalWifi, tvSinalMovel, tvLatitude, tvLongitude;
+        private TextView tvSinalWifi, tvSinalMovel, tvLatitude, tvLongitude, tvTipoRede, tvLevel;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -69,6 +87,8 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             tvSinalMovel = itemView.findViewById(R.id.tvSinalMovel);
             tvLatitude = itemView.findViewById(R.id.tvLatitude);
             tvLongitude = itemView.findViewById(R.id.tvLongitude);
+            tvTipoRede = itemView.findViewById(R.id.tvTipoRede);
+            tvLevel = itemView.findViewById(R.id.tvLevel);
         }
     }
 }

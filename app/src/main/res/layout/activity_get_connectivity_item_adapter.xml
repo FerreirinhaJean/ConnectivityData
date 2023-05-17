@@ -39,6 +39,26 @@
                 tools:text="Intensidade do Sinal: 80%" />
 
             <TextView
+                android:id="@+id/tvTipoRede"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:fontFamily="@font/roboto"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                tools:text="Tipo Conexão Móvel: 3G" />
+
+            <TextView
+                android:id="@+id/tvLevel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:fontFamily="@font/roboto"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                tools:text="Level: 0" />
+
+            <TextView
                 android:id="@+id/tvLatitude"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
