@@ -1,6 +1,7 @@
 package br.com.jean.connectivitydata.adapter;
 
 import android.content.Context;
+import android.telephony.CellSignalStrength;
 import android.telephony.TelephonyManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,17 +39,16 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ConnectivityStattement connectivityStattement = connectivityStattements.get(position);
         String sinalWifi = "Intensidade do sinal wi-fi: " + connectivityStattement.getWifi() + "%";
-        String sinalMovel = "Intensidade do sinal móvel: " + connectivityStattement.getMovel() + "%";
+        String sinalMovel = "Intensidade do sinal móvel: " + connectivityStattement.getMovel() + " dBm";
         String latitude = "Latitude: " + connectivityStattement.getLatitude();
         String longitude = "Longitude: " + connectivityStattement.getLongitude();
-        String level = "Level: " + connectivityStattement.getLevel();
 
         holder.tvSinalWifi.setText(sinalWifi);
         holder.tvSinalMovel.setText(sinalMovel);
         holder.tvLatitude.setText(latitude);
         holder.tvLongitude.setText(longitude);
         holder.tvTipoRede.setText(convertNetworkType(connectivityStattement.getNetworkType()));
-        holder.tvLevel.setText(level);
+        holder.tvLevel.setText(convertLevel(connectivityStattement.getLevel()));
     }
 
     @Override
@@ -63,17 +63,81 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     }
 
     private String convertNetworkType(int type) {
+        String r = "Tipo de conexão móvel: ";
+
         if (type == TelephonyManager.NETWORK_TYPE_LTE) {
-            return "Tipo de conexão móvel: 4G";
+            return r + "4G";
         }
         if (type == TelephonyManager.NETWORK_TYPE_GSM) {
-            return "Tipo de conexão móvel: 2G";
+            return r + "2G";
         }
         if (type == TelephonyManager.NETWORK_TYPE_CDMA) {
-            return "Tipo de conexão móvel: 3G";
+            return r + "3G";
+        }
+        if (type == TelephonyManager.NETWORK_TYPE_GPRS) {
+            return r + "GPRS";
+        }
+        if (type == TelephonyManager.NETWORK_TYPE_EDGE) {
+            return r + "EDGE";
+        }
+        if (type == TelephonyManager.NETWORK_TYPE_UMTS) {
+            return r + "UMTS";
+        }
+        if (type == TelephonyManager.NETWORK_TYPE_EVDO_0) {
+            return r + "EVDO_0";
+        }
+        if (type == TelephonyManager.NETWORK_TYPE_EVDO_A) {
+            return r + "EVDO_A";
+        }
+        if (type == TelephonyManager.NETWORK_TYPE_1xRTT) {
+            return r + "1xRTT";
+        }
+        if (type == TelephonyManager.NETWORK_TYPE_HSDPA) {
+            return r + "HSDPA";
+        }
+        if (type == TelephonyManager.NETWORK_TYPE_HSUPA) {
+            return r + "HSUPA";
+        }
+        if (type == TelephonyManager.NETWORK_TYPE_HSPA) {
+            return r + "HSPA";
+        }
+        if (type == TelephonyManager.NETWORK_TYPE_IDEN) {
+            return r + "IDEN";
+        }
+        if (type == TelephonyManager.NETWORK_TYPE_EVDO_B) {
+            return r + "EVDO_B";
+        }
+        if (type == TelephonyManager.NETWORK_TYPE_EHRPD) {
+            return r + "EHRPD";
+        }
+        if (type == TelephonyManager.NETWORK_TYPE_HSPAP) {
+            return r + "HSPAP";
+        }
+        if (type == TelephonyManager.NETWORK_TYPE_TD_SCDMA) {
+            return r + "SCDMA";
+        }
+        if (type == TelephonyManager.NETWORK_TYPE_IWLAN) {
+            return r + "IWLAN";
+        }
+        if (type == TelephonyManager.NETWORK_TYPE_NR) {
+            return r + "NR";
         }
 
-        return "Tipo de conexão móvel: Indisponível";
+
+        return r + "Desconhecido";
+    }
+
+    private String convertLevel(int level) {
+        if (level == CellSignalStrength.SIGNAL_STRENGTH_GOOD)
+            return "Qualidade sinal: Bom";
+        if (level == CellSignalStrength.SIGNAL_STRENGTH_GREAT)
+            return "Qualidade sinal: Ótimo";
+        if (level == CellSignalStrength.SIGNAL_STRENGTH_MODERATE)
+            return "Qualidade sinal: Moderado";
+        if (level == CellSignalStrength.SIGNAL_STRENGTH_POOR)
+            return "Qualidade sinal: Ruim";
+
+        return "Qualidade sinal: Desconhecido/Nenhum";
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

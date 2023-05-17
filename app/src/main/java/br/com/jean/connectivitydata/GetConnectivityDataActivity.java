@@ -22,6 +22,8 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.DecimalFormat;
+
 import br.com.jean.connectivitydata.adapter.ListAdapter;
 import br.com.jean.connectivitydata.models.ConnectivityStattement;
 import br.com.jean.connectivitydata.models.dao.ConnectivityStattementsDao;
@@ -102,7 +104,6 @@ public class GetConnectivityDataActivity extends AppCompatActivity {
                         double wifi = WifiManager.calculateSignalLevel(signalStrength, 100);
                         double latitude = location.getLatitude();
                         double longitude = location.getLongitude();
-                        double movel = 0.0;
                         int networkType = getNetworkType();
 
                         ConnectivityStattement connectivityStattement = new ConnectivityStattement();
@@ -112,7 +113,7 @@ public class GetConnectivityDataActivity extends AppCompatActivity {
                         connectivityStattement.setNetworkType(networkType);
 
                         if (telephonyManager != null)
-                          connectivityStattement.setMovel(getInfoTelephony(connectivityStattement));
+                            connectivityStattement.setMovel(getInfoTelephony(connectivityStattement));
 
                         connectivityStattementsDao.addRegister(connectivityStattement);
                         listAdapter.update();
@@ -142,27 +143,30 @@ public class GetConnectivityDataActivity extends AppCompatActivity {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 SignalStrength signalStrength = telephonyManager.getSignalStrength();
-                signalStrength.getLevel();
+                conn.setLevel(signalStrength.getLevel());
                 int networkType = conn.getNetworkType();
+
                 Log.d("SINAL", "networkType: " + networkType);
+                Log.d("SINAL", "level: " + conn.getLevel());
+                Log.d("SINAL", "net: " + telephonyManager.getNetworkSpecifier());
 
                 if (networkType == TelephonyManager.NETWORK_TYPE_CDMA) {//3G
                     signalStrengthValue = signalStrength.getCdmaDbm();
-                }
-                if (networkType == TelephonyManager.NETWORK_TYPE_GSM) {//2G
+                } else if (networkType == TelephonyManager.NETWORK_TYPE_GSM) {//2G
                     signalStrengthValue = signalStrength.getGsmSignalStrength();
                 }
-                if (networkType == TelephonyManager.NETWORK_TYPE_LTE) {//4G
+//                else if (networkType == TelephonyManager.NETWORK_TYPE_LTE) {//4G
+                else {//4G
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                         signalStrengthValue = telephonyManager.getAllCellInfo().get(0).getCellSignalStrength().getDbm();
-                        Log.d("SINAL", "signalStrengthValue: " + signalStrengthValue);
                     }
                 }
 
-                if (signalStrengthValue <= -113 || signalStrengthValue == 0) return 0;
-                if (signalStrengthValue >= -51) return 100;
-
-                return (signalStrengthValue + 113) * (100 / 62);
+                return signalStrengthValue;
+//                if (signalStrengthValue <= -113 || signalStrengthValue == 0) return 0;
+//                if (signalStrengthValue >= -51) return 100;
+//
+//                return (signalStrengthValue + 113) * (100 / 62);
 
             }
         }
