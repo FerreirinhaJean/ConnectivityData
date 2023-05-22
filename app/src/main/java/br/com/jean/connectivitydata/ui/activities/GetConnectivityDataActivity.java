@@ -1,4 +1,4 @@
-package br.com.jean.connectivitydata;
+package br.com.jean.connectivitydata.ui.activities;
 
 import android.Manifest;
 import android.content.Context;
@@ -24,9 +24,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.DecimalFormat;
 
+import br.com.jean.connectivitydata.R;
 import br.com.jean.connectivitydata.adapter.ListAdapter;
 import br.com.jean.connectivitydata.models.ConnectivityStattement;
 import br.com.jean.connectivitydata.models.dao.ConnectivityStattementsDao;
+import br.com.jean.connectivitydata.repositories.ConnectivityStattementRepository;
 
 public class GetConnectivityDataActivity extends AppCompatActivity {
 
@@ -35,17 +37,19 @@ public class GetConnectivityDataActivity extends AppCompatActivity {
     private TelephonyManager telephonyManager;
     private LocationManager locationManager;
     private LocationListener locationListener;
-
     private RecyclerView recyclerView;
     private Button btParar;
     private ListAdapter listAdapter;
     private ConnectivityStattementsDao connectivityStattementsDao = new ConnectivityStattementsDao();
+    private ConnectivityStattementRepository connectivityStattementRepository;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_get_connectivity_data);
+
+        connectivityStattementRepository = new ConnectivityStattementRepository(this);
 
         btParar = findViewById(R.id.btParar);
         recyclerView = findViewById(R.id.rvDados);
@@ -113,9 +117,10 @@ public class GetConnectivityDataActivity extends AppCompatActivity {
                         connectivityStattement.setNetworkType(networkType);
 
                         if (telephonyManager != null)
-                            connectivityStattement.setMovel(getInfoTelephony(connectivityStattement));
+                            getInfoTelephony(connectivityStattement);
 
                         connectivityStattementsDao.addRegister(connectivityStattement);
+                        connectivityStattementRepository.insertConnectivityData(connectivityStattement);
                         listAdapter.update();
                     }
                 }
@@ -136,7 +141,7 @@ public class GetConnectivityDataActivity extends AppCompatActivity {
         return TelephonyManager.NETWORK_TYPE_UNKNOWN;
     }
 
-    private double getInfoTelephony(ConnectivityStattement conn) {
+    private void getInfoTelephony(ConnectivityStattement conn) {
         int signalStrengthValue = 0;
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_PHONE_STATE)
                 == PackageManager.PERMISSION_GRANTED) {
@@ -147,12 +152,9 @@ public class GetConnectivityDataActivity extends AppCompatActivity {
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
                     signalStrengthValue = telephonyManager.getAllCellInfo().get(0).getCellSignalStrength().getDbm();
-
-
-                return signalStrengthValue;
             }
         }
-        return signalStrengthValue;
+        conn.setMovel((double) signalStrengthValue);
     }
 
     private void stopLocationUpdates() {
@@ -165,7 +167,6 @@ public class GetConnectivityDataActivity extends AppCompatActivity {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED;
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
