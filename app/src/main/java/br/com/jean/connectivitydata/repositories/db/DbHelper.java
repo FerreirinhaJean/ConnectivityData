@@ -15,7 +15,8 @@ public class DbHelper extends SQLiteOpenHelper {
             "latitude REAL," +
             "longitude REAL," +
             "network_type INTEGER," +
-            "level INTEGER" +
+            "level INTEGER," +
+            "is_synchronized INTEGER" +
             ")";
 
     public DbHelper(Context context) {

@@ -30,30 +30,6 @@ public class ConnectivityStattementRepository {
         dbHelper.close();
     }
 
-    private String convertNetworkType(int type) {
-        switch (type) {
-            case TelephonyManager.NETWORK_TYPE_EDGE:
-            case TelephonyManager.NETWORK_TYPE_GPRS:
-            case TelephonyManager.NETWORK_TYPE_CDMA:
-            case TelephonyManager.NETWORK_TYPE_IDEN:
-            case TelephonyManager.NETWORK_TYPE_1xRTT:
-                return "2G";
-            case TelephonyManager.NETWORK_TYPE_UMTS:
-            case TelephonyManager.NETWORK_TYPE_HSDPA:
-            case TelephonyManager.NETWORK_TYPE_HSPA:
-            case TelephonyManager.NETWORK_TYPE_HSPAP:
-            case TelephonyManager.NETWORK_TYPE_EVDO_0:
-            case TelephonyManager.NETWORK_TYPE_EVDO_A:
-            case TelephonyManager.NETWORK_TYPE_EVDO_B:
-                return "3G";
-            case TelephonyManager.NETWORK_TYPE_LTE:
-                return "4G";
-            case TelephonyManager.NETWORK_TYPE_NR:
-                return "5G";
-            default:
-                return "Desconhecido";
-        }
-    }
 
     public long insertConnectivityData(ConnectivityStattement connectivity) {
         try {
@@ -66,6 +42,7 @@ public class ConnectivityStattementRepository {
             values.put("longitude", connectivity.getLongitude());
             values.put("network_type", connectivity.getNetworkType());
             values.put("level", connectivity.getLevel());
+            values.put("is_synchronized", connectivity.isSynchronized());
 
             return database.insert("connectivity", null, values);
         } catch (Exception exception) {
@@ -75,7 +52,7 @@ public class ConnectivityStattementRepository {
         }
     }
 
-    public List<ConnectivityStattementDto> getAllConnectivityData() {
+    public List<ConnectivityStattement> getAllConnectivityData() {
         try {
             open();
 
@@ -86,42 +63,48 @@ public class ConnectivityStattementRepository {
                     "latitude",
                     "longitude",
                     "network_type",
-                    "level"
+                    "level",
+                    "is_synchronized"
             };
 
             Cursor cursor = database.query(
                     "connectivity",
                     allColumns,
-                    null,
+                    "is_synchronized = 0",
                     null,
                     null,
                     null,
                     null
             );
 
-            List<ConnectivityStattementDto> connectivityStattementDtos = new ArrayList<>();
+            List<ConnectivityStattement> connectivityStattements = new ArrayList<>();
 
             if (cursor != null && cursor.moveToFirst()) {
                 do {
+                    int idIndex = cursor.getColumnIndex("id");
                     int latitudeIndex = cursor.getColumnIndex("latitude");
                     int longitudeIndex = cursor.getColumnIndex("longitude");
                     int wifiIndex = cursor.getColumnIndex("wifi");
                     int movelIndex = cursor.getColumnIndex("movel");
                     int levelIndex = cursor.getColumnIndex("level");
                     int networkTypeIndex = cursor.getColumnIndex("network_type");
+                    int isSynchronizedIndex = cursor.getColumnIndex("is_synchronized");
 
+                    long id = cursor.getLong(idIndex);
                     double latitude = cursor.getDouble(latitudeIndex);
                     double longitude = cursor.getDouble(longitudeIndex);
                     double wifi = cursor.getDouble(wifiIndex);
                     double movel = cursor.getDouble(movelIndex);
                     int level = cursor.getInt(levelIndex);
-                    String networkType = convertNetworkType(cursor.getInt(networkTypeIndex));
+                    int t = cursor.getInt(isSynchronizedIndex);
+                    boolean isSynchronized = cursor.getInt(isSynchronizedIndex) != 0;
+                    int networkType = cursor.getInt(networkTypeIndex);
 
-                    connectivityStattementDtos.add(new ConnectivityStattementDto(latitude, longitude, wifi, movel, level, networkType));
+                    connectivityStattements.add(new ConnectivityStattement(id, wifi, movel, latitude, longitude, networkType, level, isSynchronized));
                 } while (cursor.moveToNext());
             }
 
-            return connectivityStattementDtos;
+            return connectivityStattements;
 
         } catch (Exception exception) {
             throw exception;
@@ -129,5 +112,30 @@ public class ConnectivityStattementRepository {
             close();
         }
     }
+
+    public void updateIsSynchronized(Long id) {
+        try {
+            open();
+
+            ContentValues values = new ContentValues();
+            values.put("is_synchronized", true);
+
+            String whereClause = "id = ?";
+            String[] whereArgs = {String.valueOf(id)};
+
+            int rowsAffected = database.update("connectivity", values, whereClause, whereArgs);
+
+            if (rowsAffected > 0) {
+                Log.d("DBHelper", "Registrado com sucesso");
+            } else {
+                Log.d("DBHelper", "Erro no registro");
+            }
+        } catch (Exception exception) {
+            throw exception;
+        } finally {
+            close();
+        }
+    }
+
 
 }

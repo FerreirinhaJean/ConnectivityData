@@ -1,7 +1,6 @@
 package br.com.jean.connectivitydata.ui.activities;
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -11,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.List;
 
 import br.com.jean.connectivitydata.R;
+import br.com.jean.connectivitydata.models.ConnectivityStattement;
 import br.com.jean.connectivitydata.models.dto.ConnectivityStattementDto;
 import br.com.jean.connectivitydata.repositories.ConnectivityStattementRepository;
 import br.com.jean.connectivitydata.services.ConnectivityService;
@@ -35,8 +35,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         btSincronizar.setOnClickListener(v -> {
-            List<ConnectivityStattementDto> data = connectivityStattementRepository.getAllConnectivityData();
-
+            List<ConnectivityStattement> data = connectivityStattementRepository.getAllConnectivityData();
+            Log.d("enviarObjetoAPI", "TAMANHO: " + data.size());
             ConnectivityService service = new ConnectivityService();
             int batchSize = 500;
             int dataSize = data.size();
@@ -44,8 +44,8 @@ public class MainActivity extends AppCompatActivity {
             int endIndex = Math.min(startIndex + batchSize, dataSize);
 
             while (startIndex < dataSize) {
-                List<ConnectivityStattementDto> batchData = data.subList(startIndex, endIndex);
-                service.enviarObjetoAPI(batchData);
+                List<ConnectivityStattement> batchData = data.subList(startIndex, endIndex);
+                service.enviarObjetoAPI(batchData, connectivityStattementRepository);
 
                 startIndex = endIndex;
                 endIndex = Math.min(startIndex + batchSize, dataSize);

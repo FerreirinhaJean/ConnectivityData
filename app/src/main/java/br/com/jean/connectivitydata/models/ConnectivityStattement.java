@@ -8,8 +8,21 @@ public class ConnectivityStattement {
     private Double longitude;
     private int networkType;
     private int level;
+    private boolean isSynchronized;
 
     public ConnectivityStattement() {
+        this.isSynchronized = false;
+    }
+
+    public ConnectivityStattement(Long id, Double wifi, Double movel, Double latitude, Double longitude, int networkType, int level, boolean isSynchronized) {
+        this.id = id;
+        this.wifi = wifi;
+        this.movel = movel;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.networkType = networkType;
+        this.level = level;
+        this.isSynchronized = isSynchronized;
     }
 
     public Long getId() {
@@ -66,5 +79,13 @@ public class ConnectivityStattement {
 
     public void setLevel(int level) {
         this.level = level;
+    }
+
+    public boolean isSynchronized() {
+        return isSynchronized;
+    }
+
+    public void setSynchronized(boolean aSynchronized) {
+        isSynchronized = aSynchronized;
     }
 }
