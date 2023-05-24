@@ -137,5 +137,16 @@ public class ConnectivityStattementRepository {
         }
     }
 
+    public void deleteAllConnectivityRecords() {
+        try {
+            open();
+            database.delete("connectivity", null, null);
+        } catch (Exception exception) {
+            throw exception;
+        } finally {
+            close();
+        }
+
+    }
 
 }

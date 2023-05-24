@@ -10,6 +10,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -28,7 +29,6 @@ public class MainActivity extends AppCompatActivity {
     private Button btIniciar;
     private ConnectivityStattementRepository connectivityStattementRepository;
     private ProgressDialog progressDialog;
-    private TextView tvQtdDadosGerados;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         btIniciar = findViewById(R.id.btIniciar);
-        tvQtdDadosGerados = findViewById(R.id.tvQtdDadosGerados);
         progressDialog = new ProgressDialog(this);
 
         connectivityStattementRepository = new ConnectivityStattementRepository(this);
@@ -46,12 +45,6 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        tvQtdDadosGerados.setText("Registros gerados: " + connectivityStattementRepository.getAllConnectivityData().size());
     }
 
     @Override
@@ -91,11 +84,12 @@ public class MainActivity extends AppCompatActivity {
                                     startIndex = endIndex;
                                     endIndex = Math.min(startIndex + batchSize, dataSize);
                                 }
-
-                                runOnUiThread(() -> progressDialog.dismiss());
+                                runOnUiThread(() -> {
+                                    progressDialog.dismiss();
+                                    showToast("Dados enviados com sucesso!");
+                                });
                             }).start();
                         }).setNegativeButton("Cancelar", (dialog, which) -> {
-
                         });
 
                 AlertDialog dialog = builder.create();
@@ -104,11 +98,24 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
             case R.id.limparDados: {
-                //Funcao
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setMessage("Esta ação irá apagar todos os registros gerados")
+                        .setPositiveButton("Confirmar", (dialog, which) -> {
+                            connectivityStattementRepository.deleteAllConnectivityRecords();
+                            showToast("Dados apagados com sucesso!");
+                        }).setNegativeButton("Cancelar", (dialog, which) -> {
+                        });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
                 return true;
             }
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }
