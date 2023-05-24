@@ -1,10 +1,18 @@
 package br.com.jean.connectivitydata.ui.activities;
 
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.List;
@@ -17,8 +25,10 @@ import br.com.jean.connectivitydata.services.ConnectivityService;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button btIniciar, btSincronizar;
+    private Button btIniciar;
     private ConnectivityStattementRepository connectivityStattementRepository;
+    private ProgressDialog progressDialog;
+    private TextView tvQtdDadosGerados;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +36,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         btIniciar = findViewById(R.id.btIniciar);
-        btSincronizar = findViewById(R.id.btSincronizar);
+        tvQtdDadosGerados = findViewById(R.id.tvQtdDadosGerados);
+        progressDialog = new ProgressDialog(this);
+
         connectivityStattementRepository = new ConnectivityStattementRepository(this);
 
         btIniciar.setOnClickListener(v -> {
@@ -34,22 +46,69 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        btSincronizar.setOnClickListener(v -> {
-            List<ConnectivityStattement> data = connectivityStattementRepository.getAllConnectivityData();
-            Log.d("enviarObjetoAPI", "TAMANHO: " + data.size());
-            ConnectivityService service = new ConnectivityService();
-            int batchSize = 500;
-            int dataSize = data.size();
-            int startIndex = 0;
-            int endIndex = Math.min(startIndex + batchSize, dataSize);
+    }
 
-            while (startIndex < dataSize) {
-                List<ConnectivityStattement> batchData = data.subList(startIndex, endIndex);
-                service.enviarObjetoAPI(batchData, connectivityStattementRepository);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        tvQtdDadosGerados.setText("Registros gerados: " + connectivityStattementRepository.getAllConnectivityData().size());
+    }
 
-                startIndex = endIndex;
-                endIndex = Math.min(startIndex + batchSize, dataSize);
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.menuSinzronizar: {
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setMessage("Esta ação irá sincronizar os dados com o servidor")
+                        .setPositiveButton("Confirmar", (dialog, which) -> {
+                            progressDialog.setMessage("Sinzronizando com o servidor...");
+                            progressDialog.setCancelable(false);
+                            progressDialog.show();
+
+                            new Thread(() -> {
+                                List<ConnectivityStattement> data = connectivityStattementRepository.getAllConnectivityData();
+                                ConnectivityService service = new ConnectivityService();
+
+                                int batchSize = 500;
+                                int dataSize = data.size();
+                                int startIndex = 0;
+                                int endIndex = Math.min(startIndex + batchSize, dataSize);
+
+                                while (startIndex < dataSize) {
+                                    List<ConnectivityStattement> batchData = data.subList(startIndex, endIndex);
+                                    service.enviarObjetoAPI(batchData, connectivityStattementRepository);
+
+                                    startIndex = endIndex;
+                                    endIndex = Math.min(startIndex + batchSize, dataSize);
+                                }
+
+                                runOnUiThread(() -> progressDialog.dismiss());
+                            }).start();
+                        }).setNegativeButton("Cancelar", (dialog, which) -> {
+
+                        });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
+                return true;
             }
-        });
+            case R.id.limparDados: {
+                //Funcao
+                return true;
+            }
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }

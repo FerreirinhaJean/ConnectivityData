@@ -1,6 +1,6 @@
 package br.com.jean.connectivitydata.services;
 
-import android.content.Context;
+import android.app.ProgressDialog;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -69,9 +69,6 @@ public class ConnectivityService {
             try {
                 Response response = client.newCall(request).execute();
                 if (response.isSuccessful()) {
-                    String resposta = response.body().string();
-                    Log.d("enviarObjetoAPI", "DEU CERTO: " + resposta);
-
                     for (ConnectivityStattement obj : objeto) {
                         repository.updateIsSynchronized(obj.getId());
                     }
