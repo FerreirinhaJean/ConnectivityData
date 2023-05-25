@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.List;
 
 import br.com.jean.connectivitydata.R;
+import br.com.jean.connectivitydata.models.Callback;
 import br.com.jean.connectivitydata.models.ConnectivityStattement;
 import br.com.jean.connectivitydata.models.dto.ConnectivityStattementDto;
 import br.com.jean.connectivitydata.repositories.ConnectivityStattementRepository;
@@ -79,15 +80,26 @@ public class MainActivity extends AppCompatActivity {
 
                                 while (startIndex < dataSize) {
                                     List<ConnectivityStattement> batchData = data.subList(startIndex, endIndex);
-                                    service.enviarObjetoAPI(batchData, connectivityStattementRepository);
+                                    service.enviarObjetoAPI(batchData, connectivityStattementRepository, new Callback<String>() {
+                                        @Override
+                                        public void onSuccess(String result) {
+                                            runOnUiThread(() -> {
+                                                progressDialog.dismiss();
+                                                showToast(result);
+                                            });
+                                        }
 
+                                        @Override
+                                        public void onFailure(String errorMessage) {
+                                            runOnUiThread(() -> {
+                                                progressDialog.dismiss();
+                                                showToast(errorMessage);
+                                            });
+                                        }
+                                    });
                                     startIndex = endIndex;
                                     endIndex = Math.min(startIndex + batchSize, dataSize);
                                 }
-                                runOnUiThread(() -> {
-                                    progressDialog.dismiss();
-                                    showToast("Dados enviados com sucesso!");
-                                });
                             }).start();
                         }).setNegativeButton("Cancelar", (dialog, which) -> {
                         });

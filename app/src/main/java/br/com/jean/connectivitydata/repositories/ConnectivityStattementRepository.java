@@ -70,7 +70,7 @@ public class ConnectivityStattementRepository {
             Cursor cursor = database.query(
                     "connectivity",
                     allColumns,
-                    "is_synchronized = 0",
+                    null,
                     null,
                     null,
                     null,
@@ -133,7 +133,7 @@ public class ConnectivityStattementRepository {
         } catch (Exception exception) {
             throw exception;
         } finally {
-            close();
+//            close();
         }
     }
 

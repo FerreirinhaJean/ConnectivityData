@@ -102,7 +102,7 @@ public class GetConnectivityDataActivity extends AppCompatActivity {
             locationListener = location -> {
                 if (hasLocationPermission()) {
                     float speed = location.getSpeed();
-                    if (speed > 0.15F) {
+                    if (speed > 0.1F) {
                         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
                         int signalStrength = wifiInfo.getRssi();
                         double wifi = WifiManager.calculateSignalLevel(signalStrength, 100);
