@@ -11,19 +11,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import java.text.DecimalFormat;
-
 import br.com.jean.connectivitydata.R;
 import br.com.jean.connectivitydata.adapter.ListAdapter;
 import br.com.jean.connectivitydata.models.ConnectivityStattement;

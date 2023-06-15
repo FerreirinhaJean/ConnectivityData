@@ -1,15 +1,13 @@
 package br.com.jean.connectivitydata.ui.activities;
 
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -21,7 +19,6 @@ import java.util.List;
 import br.com.jean.connectivitydata.R;
 import br.com.jean.connectivitydata.models.Callback;
 import br.com.jean.connectivitydata.models.ConnectivityStattement;
-import br.com.jean.connectivitydata.models.dto.ConnectivityStattementDto;
 import br.com.jean.connectivitydata.repositories.ConnectivityStattementRepository;
 import br.com.jean.connectivitydata.services.ConnectivityService;
 
@@ -30,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private Button btIniciar;
     private ConnectivityStattementRepository connectivityStattementRepository;
     private ProgressDialog progressDialog;
+    private EditText etUrl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         btIniciar = findViewById(R.id.btIniciar);
+        etUrl = findViewById(R.id.etUrl);
         progressDialog = new ProgressDialog(this);
 
         connectivityStattementRepository = new ConnectivityStattementRepository(this);
@@ -62,16 +61,28 @@ public class MainActivity extends AppCompatActivity {
 
         switch (id) {
             case R.id.menuSinzronizar: {
+                String url = etUrl.getText().toString();
+                if(url.isEmpty()){
+                    showToast("Informe a URL do servidor para sincronizar os dados!");
+                    return true;
+                }
+
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                 builder.setMessage("Esta ação irá sincronizar os dados com o servidor")
                         .setPositiveButton("Confirmar", (dialog, which) -> {
-                            progressDialog.setMessage("Sinzronizando com o servidor...");
+                            progressDialog.setMessage("Sincronizando com o servidor...");
                             progressDialog.setCancelable(false);
                             progressDialog.show();
 
                             new Thread(() -> {
                                 List<ConnectivityStattement> data = connectivityStattementRepository.getAllConnectivityData();
-                                ConnectivityService service = new ConnectivityService();
+                                ConnectivityService service = new ConnectivityService(url);
+
+                                if (data.size() == 0) {
+                                    runOnUiThread(() -> {
+                                        progressDialog.dismiss();
+                                    });
+                                }
 
                                 int batchSize = 500;
                                 int dataSize = data.size();

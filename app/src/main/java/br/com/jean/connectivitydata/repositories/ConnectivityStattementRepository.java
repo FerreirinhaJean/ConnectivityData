@@ -4,14 +4,12 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import br.com.jean.connectivitydata.models.ConnectivityStattement;
-import br.com.jean.connectivitydata.models.dto.ConnectivityStattementDto;
 import br.com.jean.connectivitydata.repositories.db.DbHelper;
 
 public class ConnectivityStattementRepository {

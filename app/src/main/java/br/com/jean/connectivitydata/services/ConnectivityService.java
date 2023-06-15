@@ -21,13 +21,17 @@ import okhttp3.Response;
 
 public class ConnectivityService {
 
-    private static final String URL = "https://apiconectividadeunisc--lucasfreitag.repl.co/list";
     private static final String NETWORK_TYPE_2G = "2G";
     private static final String NETWORK_TYPE_3G = "3G";
     private static final String NETWORK_TYPE_4G = "4G";
     private static final String NETWORK_TYPE_5G = "5G";
     private static final String NETWORK_TYPE_UNKNOWN = "Desconhecido";
 
+    private String URL;
+
+    public ConnectivityService(String url) {
+        this.URL = url;
+    }
 
     private String convertNetworkType(int type) {
         switch (type) {
